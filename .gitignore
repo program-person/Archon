@@ -1,0 +1,8 @@
+#仮想環境は除外
+backend/venv/
+#環境変数ファイルはAPIキーが含まれているので除外
+backend/.env
+
+#Nest.jsのビルド生成物は除外
+frontend/.next/
+frontend/node_modules/
