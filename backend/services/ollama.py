@@ -34,7 +34,7 @@ async def generate_answer(query: str,search_results: list[dict]) -> str:
 
     #OllamaのResr APIにPOSTリクエストを送信
     #/api/generate　エンドポイントがテキスト生成を担当
-    async with httpx.AsyncClient(timeout=60.0) as client:
+    async with httpx.AsyncClient(timeout=300.0) as client:
         response = await client.post(
             f"{Ollama_Base_URL}/api/generate",
             json = {
@@ -43,6 +43,8 @@ async def generate_answer(query: str,search_results: list[dict]) -> str:
                 "stream" : False,
             },
         )
+        print("Ollama status:", response.status_code)
+        print("Ollama response:", response.text)
         response.raise_for_status()
     
     #れすっぽんすのjsonから回答のテキストのみ取り出す

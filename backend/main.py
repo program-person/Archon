@@ -1,12 +1,18 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from services.tavily import search_web
-from services.ollama import generate_answer
+from routers import search, history
+from database import init_db
+import sqlite3
+
 
 #.envファイルを読み込む
 load_dotenv()
+init_db()
 
 #fastapiのインスタンスを作成
 app = FastAPI(
@@ -23,23 +29,11 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
+app.include_router(search.router)
+app.include_router(history.router)
 
 @app.get("/")
 async def health_check():
     return{
         "status": "ok",
-        "model": os.getenv("OLLAMA_MODEL")
     }
-
-@app.get("/test-ollama")
-async def test_ollama():
-    #ダミーの検索結果を渡します
-    dummy_results = [
-        {
-            "title"  : "Rust公式サイト",
-            "url"    : "https://rust-lang.org",
-            "content": "Rustはメモリ安全性をコンパイル時に保証するシステムプログラミング言語です。",   
-        }
-    ]
-    answer = await generate_answer("Rustとは何か", dummy_results)
-    return{"answer" : answer}
