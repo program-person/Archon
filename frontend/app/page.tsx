@@ -1,7 +1,7 @@
 'use client'//Nest.jsでブラウザ側で動かすための宣言
 
-import { useState} from 'react'
-import { SearchResponse, HistoryItem } from './types'
+import { useState , useEffect} from 'react'
+import { SearchResponse, HistoryItem, UsageInfo} from './types'
 import Searchbar from '@/components/SearchBar'
 import AnswerCard from '@/components/AnswerCard'
 import Sidebar from '@/components/Sidebar'
@@ -11,11 +11,29 @@ export default function Home() {
   //useStateは「変化する値」を管理する
   //[現在の値,値を変える関数]という形で使う
 
+
+
   const [query, setQuery] = useState('') //検索クエリ
   const [answer, setAnswer] = useState<SearchResponse | null>(null) //回答
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [isLoading, setIsloading] = useState(false)//ローディング状態
   const [isSidebarOpen, setisSidebarOpen] = useState(false)//サイドバーの状態
+  const [usage, setUsage] = useState<UsageInfo | null>(null)
+
+  useEffect(() => {
+    fetchUsage()
+  }, [])
+  //使用料取得関数
+  const fetchUsage = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/usage`)
+      const data: UsageInfo = await res.json()
+      console.log("Usage取得:", data)
+      setUsage(data)
+    } catch(err){
+      console.error("使用料取得エラー", err)
+    }
+  }
 
   //検索処理
   const handleSearch = async (searchQuery: string) => {
@@ -26,7 +44,7 @@ export default function Home() {
 
     try{
       //FastApiの/searchエンドポイントをたたく
-      const res = await fetch("http://localhost:8000/search",{
+      const res = await fetch(`http://localhost:8000/search`,{
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({query: searchQuery, max_results: 3}),
@@ -42,13 +60,14 @@ export default function Home() {
       console.error(err)
     } finally{
       setIsloading(false)
+      await fetchUsage()
     }
   }
 
   //履歴保存
   const saveHistory = async (q: string, data: SearchResponse) =>{
     try{
-      await fetch("http://localhost:8000/history",{
+      await fetch(`http://localhost:8000/history`,{
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -67,7 +86,7 @@ export default function Home() {
   //履歴の取得
   const fetchHistory = async () => {
     try{
-      const res =await fetch("http://localhost:8000/history")
+      const res =await fetch(`http://localhost:8000/history`)
       const data: HistoryItem[] = await res.json()
       setHistory(data)
     }catch (err){
@@ -85,7 +104,7 @@ export default function Home() {
   //履歴の削除
   const handleDeleteHistory = async (id: number) => {
     try{
-      await fetch('http://localhost:8000/history/${id}',{method: "DELETE"})
+      await fetch(`http://localhost:8000/history/${id}`,{method: "DELETE"})
       await fetchHistory()
     }catch(err){
       console.error("履歴削除エラー", err)
@@ -134,6 +153,21 @@ export default function Home() {
               <span className="text-base font-extrabold tracking-wider uppercase">
                 ARCH<span className="text-[#7c5cfc]">ON</span>
               </span>
+              {usage && (
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-mono
+                  ${usage.blocked
+                    ? "bg-red-500/20 border border-red-500/40 text-red-400"
+                    : usage.warning
+                    ? "bg-amber-500/20 border border-amber-500/40 text-amber-400"
+                    : "bg-white/5 border border-white/10 text-white/40"
+                  }
+                `}>
+                  <div className={`w-1.5 h-1.5 rounded-full ${
+                    usage.blocked ? "bg-red-400" : usage.warning ? "bg-amber-400" : "bg-emerald-400"
+                  }`} />
+                  {usage.remaining}/{usage.limit}
+                </div>
+              )}
           </div>
         </nav>
 
@@ -145,7 +179,7 @@ export default function Home() {
           <h1 className="text-4xl font-extrabold text-center tracking-tight mb-2">
             知を、 <span className="bg-gradient-to-r from-[#7c5cfc] to-[#a78bfa] bg-clip-text text-transparent">検索する。</span>
           </h1>
-          <p className="text-white/30 text-sm mb-8">Web検索 ×　ローカルLLM推論</p>
+          <p className="text-white/30 text-sm mb-8">Web検索 × ローカルLLM推論</p>
           
           {/*検索バー*/}
           <Searchbar

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from routers import search, history
+from routers import search, history, usage
 from database import init_db
 import sqlite3
 
@@ -31,6 +31,8 @@ app.add_middleware(
 
 app.include_router(search.router)
 app.include_router(history.router)
+app.include_router(usage.router)
+
 
 @app.get("/")
 async def health_check():

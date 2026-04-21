@@ -26,6 +26,29 @@ def init_db():
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS api_usage (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            used_at   DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     conn.commit()
     conn.close()
-    
+
+def increment_usage():
+    """検索のために呼ぶ：使用回数を1増やす"""
+    conn = get_connection()
+    conn.execute("INSERT INTO api_usage (used_at) VALUES (CURRENT_TIMESTAMP)")
+    conn.commit()
+    conn.close()
+
+def get_monthly_usage():
+    """今月の使用料を返す"""
+    conn = get_connection()
+    #今月1日以降の件数をカウント
+    row = conn.execute("""
+        SELECT COUNT(*) as count FROM api_usage
+        WHERE strftime('%Y-%m' , used_at) = strftime('%Y-%m', 'now')
+    """).fetchone()
+    conn.close()
+    return row["count"]

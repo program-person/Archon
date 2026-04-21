@@ -19,3 +19,12 @@ export type HistoryItem = {
     sources: SourceItem[]
     created_at: string
 }
+
+export type UsageInfo = {
+    used: number
+    remaining: number
+    limit: number
+    percentage: number
+    warning: boolean
+    blocked: boolean
+}

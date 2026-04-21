@@ -1,7 +1,6 @@
 "use client"
 
 import {HistoryItem} from "@/app/types"
-import { discoverValidationDepths } from "next/dist/server/app-render/instant-validation/instant-validation"
 
 type SidebarProps = {
     isOpen: boolean
@@ -47,13 +46,13 @@ export default function Sidebar({
         {/*オーバーレイ*/}
         {isOpen && (
             <div 
-                className="fixed inset-0 bg-black/55 z-10"
+                className="fixed inset-0 bg-black/55 z-30"
                 onClick={onClose}
             />
         )}
 
         {/*サイドバー本体*/}
-        <div className={'fixed left-0 top-0 bottom-0 w-[260px] bg-[#0f0f17] border-r border-white/8 z-20 flex flex-col transition-transform duratio-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}'}
+        <div className={`fixed left-0 top-0 bottom-0 w-[260px] bg-[#0f0f17] border-r border-white/8 z-40 flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
         >
                 
             {/*ヘッダー*/}
