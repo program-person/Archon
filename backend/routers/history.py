@@ -32,11 +32,11 @@ async def save_history(body: HistorySaveRequest):
     """
     conn = get_connection()
     try:
-        #sourcesはリストなのでjasonに変換してDBに保存する
-        sources_json = json.dumps(body.sources, ensure_ascill=False)
+        #sourcesはリストなのでjsonに変換してDBに保存する
+        sources_json = json.dumps(body.sources, ensure_ascii=False)
 
         cursor = conn.execute(
-            "INSET INTO history (query, answer, sources) VALUES (?, ?, ?,)",
+            "INSERT INTO history (query, answer, sources) VALUES (?, ?, ?)",
             (body.query, body.answer, sources_json)
         )
         conn.commit()
@@ -79,7 +79,7 @@ async def get_history():
             for row in rows
         ]
     finally:
-        conn.closes()
+        conn.close()
 
 @router.delete("/history/{history_id}")
 async def delete_history(history_id: int):
